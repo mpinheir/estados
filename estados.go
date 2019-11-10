@@ -5,26 +5,25 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Message struct {
-	Name string
-	Body string
-	Time int64
+	Estado string
+	Capital string
+	Populacao int64
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, req.URL.Path)
 
-	m := Message{"Alice", "Hello", 1294706395881547000}
+	m := Message{"Rio de Janeiro", "Rio de Janeiro", 8000000}
 
-	b, err := json.Marshal(m)
-
-	if err != nil {
-		log.Fatal(err)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(m); err != nil {
+		panic(err)
 	}
-
-	fmt.Fprintln(w, b)
 
 }
 
@@ -40,7 +39,14 @@ func headers(w http.ResponseWriter, req *http.Request) {
 func main() {
 
 	http.HandleFunc("/", handler)
-	http.HandleFunc("/headers", headers)
+	//http.HandleFunc("/headers", headers)
 
-	http.ListenAndServe(":8090", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+			port = "8080"
+			log.Printf("Defaulting to port %s", port)
+	}
+
+	log.Printf("Listening on port %s", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
