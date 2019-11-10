@@ -6,21 +6,37 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type Message struct {
-	Estado string
-	Capital string
+	Estado    string
+	Area      float64
+	Capital   string
 	Populacao int64
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(w, req.URL.Path)
+	m := Message{"", 0, "", 0}
 
-	m := Message{"Rio de Janeiro", "Rio de Janeiro", 8000000}
+	switch strings.ToUpper(req.URL.Path) {
+	case "/AC":
+		m = Message{"Acre", 152581.4, "Rio Branco", 829619}
+	case "/AL":
+		m = Message{"Alagoas", 27767.7, "Maceió", 3375823}
+	case "/AP":
+		m = Message{"Amapá", 142814.6, "Macapá", 797722}
+	case "/RJ":
+		m = Message{"Rio de Janeiro", 43696.1, "Rio de Janeiro", 16718956}
+	case "/SP":
+		m = Message{"São Paulo", 43696.1, "São Paulo", 16718956}
+	default:
+		//needs to return message regarding invalid format
+	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
+
 	if err := json.NewEncoder(w).Encode(m); err != nil {
 		panic(err)
 	}
@@ -43,8 +59,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-			port = "8080"
-			log.Printf("Defaulting to port %s", port)
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
 	}
 
 	log.Printf("Listening on port %s", port)
