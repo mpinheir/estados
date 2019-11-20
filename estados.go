@@ -88,19 +88,9 @@ func handler(w http.ResponseWriter, req *http.Request) {
 
 }
 
-func headers(w http.ResponseWriter, req *http.Request) {
-
-	for name, headers := range req.Header {
-		for _, h := range headers {
-			fmt.Fprintf(w, "%v: %v\n", name, h)
-		}
-	}
-}
-
 func main() {
 
 	http.HandleFunc("/", handler)
-	//http.HandleFunc("/headers", headers)
 
 	port := os.Getenv("PORT")
 	if port == "" {
