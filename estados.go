@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Message define estrututra contendo dados a serem retornados pela API
 type Message struct {
 	Estado    string
 	Area      float64
@@ -80,7 +81,6 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	//w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(m); err != nil {
 		panic(err)
@@ -92,6 +92,7 @@ func main() {
 
 	http.HandleFunc("/", handler)
 
+	// Verifica se PORT está definida e assume 8080 se não estiver.
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
