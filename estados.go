@@ -17,10 +17,11 @@ type Message struct {
 	Populacao int64
 }
 
-func handler(w http.ResponseWriter, req *http.Request) {
+// Monta struct a ser retornada analisando a sigla do estado recebido em path
+func buildMessage(path string) Message {
 	m := Message{"", 0, "", 0}
 
-	switch strings.ToUpper(req.URL.Path) {
+	switch strings.ToUpper(path) {
 	case "/AC":
 		m = Message{"Acre", 152581.4, "Rio Branco", 829619}
 	case "/AL":
@@ -76,6 +77,19 @@ func handler(w http.ResponseWriter, req *http.Request) {
 	case "/TO":
 		m = Message{"Tocantins", 1570745.7, "Palmas", 4063614}
 	default:
+		return Message{"", 0, "", 0}
+	}
+
+	return m
+}
+
+func handler(w http.ResponseWriter, req *http.Request) {
+
+	defaultMessage := Message{"", 0, "", 0}
+
+	m := buildMessage(req.URL.Path)
+
+	if m == defaultMessage {
 		w.WriteHeader(400) // Return 400 Bad Request.
 		return
 	}
