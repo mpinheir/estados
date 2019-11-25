@@ -2,117 +2,71 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-// Message define estrututra contendo dados a serem retornados pela API
-type Message struct {
-	Estado    string
-	Area      float64
-	Capital   string
-	Populacao int64
+type dadosUf struct {
+	Estado, Capital string
+	Area            float64
+	Populacao       int64
 }
 
-// Monta struct a ser retornada analisando a sigla do estado recebido em path
-func buildMessage(path string) Message {
-	m := Message{"", 0, "", 0}
-
-	switch strings.ToUpper(path) {
-	case "/AC":
-		m = Message{"Acre", 152581.4, "Rio Branco", 829619}
-	case "/AL":
-		m = Message{"Alagoas", 27767.7, "Maceió", 3375823}
-	case "/AP":
-		m = Message{"Amapá", 142814.6, "Macapá", 797722}
-	case "/AM":
-		m = Message{"Amazonas", 1570745.7, "Manaus", 4063614}
-	case "/BA":
-		m = Message{"Bahia", 564692.7, "Salvador", 15344447}
-	case "/CE":
-		m = Message{"Ceará", 148825.6, "Fortaleza", 4063614}
-	case "/DF":
-		m = Message{"Distrito Federal", 5822.1, "Brasília", 3039444}
-	case "/ES":
-		m = Message{"Espirito Santo", 46077.5, "Vitória", 4016356}
-	case "/GO":
-		m = Message{"Goiás", 340086.7, "Goiânia", 6778772}
-	case "/MA":
-		m = Message{"Maranhão", 331983.3, "São Luís", 7000229}
-	case "/MT":
-		m = Message{"Mato Grosso", 903357.9, "Cuiabá", 3344544}
-	case "/MS":
-		m = Message{"Mato Grosso do Sul", 357125.0, "Campo Grande", 2713147}
-	case "/MG":
-		m = Message{"Minas Gerais", 58652837, "Belo Horizonte", 21119536}
-	case "/PA":
-		m = Message{"Pará", 1247689.5, "Belém", 8366628}
-	case "/PB":
-		m = Message{"Paraíba", 56439.8, "João Pessoa", 4025558}
-	case "/PR":
-		m = Message{"Paraná", 199314.9, "Curituba", 11320892}
-	case "/PE":
-		m = Message{"Pernambuco", 98311.6, "Recife", 9473266}
-	case "/PI":
-		m = Message{"Piauí", 251529.2, "Teresina", 3219257}
-	case "/RJ":
-		m = Message{"Rio de Janeiro", 43696.1, "Rio de Janeiro", 16718956}
-	case "/RN":
-		m = Message{"Rio Grande do Norte", 52796.8, "Natal", 3507003}
-	case "/RS":
-		m = Message{"Rio Grande do Sul", 281748.5, "Porto Alegre", 11322895}
-	case "/RO":
-		m = Message{"Rondônia", 237576.2, "Porto Velho", 1805788}
-	case "/RR":
-		m = Message{"Roraima", 224299.0, "Boa Vista", 522636}
-	case "/SC":
-		m = Message{"Santa Catarina", 95346.2, "Florianópolis", 7001161}
-	case "/SP":
-		m = Message{"São Paulo", 43696.1, "São Paulo", 16718956}
-	case "/SE":
-		m = Message{"Sergipe", 1570745.7, "Aracaju", 4063614}
-	case "/TO":
-		m = Message{"Tocantins", 1570745.7, "Palmas", 4063614}
-	default:
-		return Message{"", 0, "", 0}
-	}
-
-	return m
+var allUfs = map[string]dadosUf{
+	"AC": dadosUf{"Acre", "Rio Branco", 152581.4, 829619},
+	"AL": dadosUf{"Alagoas", "Maceió", 27767.7, 3375823},
+	"AP": dadosUf{"Amapá", "Macapá", 142814.6, 797722},
+	"AM": dadosUf{"Amazonas", "Manaus", 1570745.7, 4063614},
+	"BA": dadosUf{"Bahia", "Salvador", 564692.7, 15344447},
+	"CE": dadosUf{"Ceará", "Fortaleza", 148825.6, 4063614},
+	"DF": dadosUf{"Distrito Federal", "Brasília", 5822.1, 3039444},
+	"ES": dadosUf{"Espirito Santo", "Vitória", 46077.5, 4016356},
+	"GO": dadosUf{"Goiás", "Goiânia", 340086.7, 6778772},
+	"MA": dadosUf{"Maranhão", "São Luís", 331983.3, 7000229},
+	"MT": dadosUf{"Mato Grosso", "Cuiabá", 903357.9, 3344544},
+	"MS": dadosUf{"Mato Grosso do Sul", "Campo Grande", 357125.0, 2713147},
+	"MG": dadosUf{"Minas Gerais", "Belo Horizonte", 58652837., 21119536},
+	"PA": dadosUf{"Pará", "Belém", 1247689.5, 8366628},
+	"PB": dadosUf{"Paraíba", "João Pessoa", 56439.8, 4025558},
+	"PR": dadosUf{"Paraná", "Curitiba", 199314.9, 11320892},
+	"PE": dadosUf{"Pernambuco", "Recife", 98311.6, 9473266},
+	"PI": dadosUf{"Piauí", "Teresina", 251529.2, 3219257},
+	"RJ": dadosUf{"Rio de Janeiro", "Rio de Janeiro", 43696.1, 16718956},
+	"RN": dadosUf{"Rio Grande do Norte", "Natal", 52796.8, 3507003},
+	"RS": dadosUf{"Rio Grande do Sul", "Porto Alegre", 281748.5, 11322895},
+	"RO": dadosUf{"Rondônia", "Porto Velho", 237576.2, 1805788},
+	"RR": dadosUf{"Roraima", "Boa Vista", 224299.0, 522636},
+	"SC": dadosUf{"Santa Catarina", "Florianópolis", 95346.2, 7001161},
+	"SP": dadosUf{"São Paulo", "São Paulo", 43696.1, 16718956},
+	"SE": dadosUf{"Sergipe", "Aracaju", 1570745.7, 4063614},
+	"TO": dadosUf{"Tocantins", "Palmas", 1570745.7, 4063614},
 }
 
-func handler(w http.ResponseWriter, req *http.Request) {
-
-	defaultMessage := Message{"", 0, "", 0}
-
-	m := buildMessage(req.URL.Path)
-
-	if m == defaultMessage {
-		w.WriteHeader(400) // Return 400 Bad Request.
-		return
+func dadosUfHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var jsonResponse []byte
+	vars := mux.Vars(r)
+	uf := vars["UF"]
+	if strings.EqualFold(uf, "all") {
+		jsonResponse, _ = json.Marshal(allUfs)
+	} else {
+		jsonResponse, _ = json.Marshal(allUfs[strings.ToUpper(uf)])
 	}
-
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
-	if err := json.NewEncoder(w).Encode(m); err != nil {
-		panic(err)
-	}
-
+	w.Write(jsonResponse)
 }
 
 func main() {
+	router := mux.NewRouter()
+	router.HandleFunc("/{UF}", dadosUfHandler)
 
-	http.HandleFunc("/", handler)
-
-	// Verifica se PORT está definida e assume 8080 se não estiver.
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 		log.Printf("Defaulting to port %s", port)
 	}
-
-	log.Printf("Listening on port %s", port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
