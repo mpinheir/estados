@@ -35,7 +35,7 @@ Execute o programa
 ./estados
 ```
 
-Teste
+Teste-1
 
 ```
 curl localhost:8080/RJ
@@ -47,7 +47,17 @@ Resultado esperado
 {"Estado":"Rio de Janeiro","Area":43696.1,"Capital":"Rio de Janeiro","Populacao":16718956}
 ```
 
-Note: curl localhost:8080/todos ou curl localhost:8080/TODOS retorna os dados de todos os estados.
+Teste-2
+
+```
+curl localhost:8080/TODOS
+```
+
+Resultado esperado
+
+```
+JSON contendo os dados de todos os estados
+```
 
 ## Author
 
