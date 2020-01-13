@@ -47,6 +47,8 @@ Resultado esperado
 {"Estado":"Rio de Janeiro","Area":43696.1,"Capital":"Rio de Janeiro","Populacao":16718956}
 ```
 
+Note: curl localhost:8080/todos ou curl localhost:8080/TODOS retorna os dados de todos os estados.
+
 ## Author
 
 [**Marcelo Pinheiro**](https://github.com/mpinheir)

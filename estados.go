@@ -51,7 +51,7 @@ func dadosUfHandler(w http.ResponseWriter, r *http.Request) {
 	var jsonResponse []byte
 	vars := mux.Vars(r)
 	uf := vars["UF"]
-	if strings.EqualFold(uf, "all") {
+	if strings.EqualFold(uf, "todos") {
 		jsonResponse, _ = json.Marshal(allUfs)
 	} else {
 		jsonResponse, _ = json.Marshal(allUfs[strings.ToUpper(uf)])
